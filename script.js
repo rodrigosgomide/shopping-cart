@@ -52,23 +52,22 @@ const r2 = () => fetchProducts('computer').then((result) => result.results).then
   });
 });
 
+function addCartIten(element) {
+    const itenId = element.target.parentElement.childNodes[0].innerText;
+      fetchItem(itenId).then((info) => {
+        const carList = document.querySelector('.cart__items');
+        const { id, title, price } = info;
+        const param = (sku, name, salePrice) => ({
+          sku, name, salePrice,
+        });
+        carList.appendChild(createCartItemElement(param(id, title, price)));
+      });
+}
+
 function addButtonEvent() {
   const buttonsToAdd = document.querySelectorAll('.item__add');
-  const carList = document.querySelector('.cart__items');
   buttonsToAdd.forEach((button) => {
-    button.addEventListener('click', (element) => {
-        const itenId = element.target.parentElement.childNodes[0].innerText;
-          fetchItem(itenId)
-          .then((info) => {
-            const { id, title, price } = info;
-            const param = (sku, name, salePrice) => ({
-              sku,
-              name,
-              salePrice,
-            });
-            carList.appendChild(createCartItemElement(param(id, title, price)));
-          });
-    });
+    button.addEventListener('click', addCartIten);
 });
 }
 
