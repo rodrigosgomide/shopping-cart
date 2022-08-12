@@ -122,4 +122,17 @@ function addButtonEvent() {
 });
 }
 
+document.querySelector('.empty-cart').addEventListener('click', (event) => {
+  if (getSavedCartItems() != null) {
+    const removeLocalStorage = JSON.parse(getSavedCartItems());
+    removeLocalStorage.splice(0);
+    saveCartItems(JSON.stringify(removeLocalStorage));
+  }
+  const cartElementsArray = [...document.querySelector('.cart__items').children];
+  cartElementsArray.forEach((element) => {
+    cartList.removeChild(element);
+  });
+  priceCalc();
+});
+
 window.onload = () => { r2().then(addButtonEvent); cartLocalStorage(); priceCalc(); };
