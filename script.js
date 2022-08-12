@@ -1,3 +1,5 @@
+const cartList = document.querySelector('.cart__items');
+
 const createProductImageElement = (imageSource) => {
   const img = document.createElement('img');
   img.className = 'item__image';
@@ -27,8 +29,14 @@ const createProductItemElement = ({ sku, name, image }) => {
 const getSkuFromProductItem = (item) => item.querySelector('span.item__sku').innerText;
 
 const cartItemClickListener = (event) => {
-  const cartItens = document.querySelector('.cart__items');
-  cartItens.removeChild(event.target);
+  if (getSavedCartItems() != null) {
+    const arrayChilds = [...event.target.parentElement.children];
+    const toRemove = arrayChilds.indexOf(event.target);
+    const removeLocalStorage = JSON.parse(getSavedCartItems());
+    removeLocalStorage.splice(toRemove, 1);
+    saveCartItems(JSON.stringify(removeLocalStorage));
+  }
+  cartList.removeChild(event.target);
 };
 
 const createCartItemElement = ({ sku, name, salePrice }) => {
@@ -52,15 +60,37 @@ const r2 = () => fetchProducts('computer').then((result) => result.results).then
   });
 });
 
+const convertObjKeys = (sku, name, salePrice) => ({
+  sku, name, salePrice,
+});
+
+function cartLocalStorage() {
+  if (getSavedCartItems() != null) {
+    const localStorage = JSON.parse(getSavedCartItems());
+    localStorage.forEach((item) => {
+      const objLocal = JSON.parse(item);
+      const itemConver = convertObjKeys(objLocal.sku, objLocal.name, objLocal.salePrice);
+      const storageItem = createCartItemElement(itemConver);
+      cartList.appendChild(storageItem);
+    }); 
+  }
+}
+
 function addCartIten(element) {
     const itenId = element.target.parentElement.childNodes[0].innerText;
       fetchItem(itenId).then((info) => {
-        const carList = document.querySelector('.cart__items');
         const { id, title, price } = info;
-        const param = (sku, name, salePrice) => ({
-          sku, name, salePrice,
-        });
-        carList.appendChild(createCartItemElement(param(id, title, price)));
+        const convertedObj = convertObjKeys(id, title, price);
+        const teste = createCartItemElement(convertedObj);
+        cartList.appendChild(teste);
+        if (getSavedCartItems() === null) {
+          const arrayTolocalStorage = JSON.stringify([]);
+          saveCartItems(arrayTolocalStorage);
+        }
+        const toStorage = JSON.stringify(convertedObj);
+        const addLocalStorage = JSON.parse(getSavedCartItems());
+        addLocalStorage.push(toStorage);
+        saveCartItems(JSON.stringify(addLocalStorage));
       });
 }
 
@@ -71,4 +101,4 @@ function addButtonEvent() {
 });
 }
 
-window.onload = () => { r2().then(addButtonEvent); };
+window.onload = () => { r2().then(addButtonEvent); cartLocalStorage(); };
